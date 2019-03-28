@@ -1,0 +1,8 @@
+# This is the "master" list of repositories for which docs will be automatically generated.
+# If the link to your repository is http://github.com/qbicsoftware/sample-repo, you just need
+# to add "sample-repo" in the list below.
+
+qoffer-portlet
+statistics-cli
+statistics-portlet
+portal-utils-lib

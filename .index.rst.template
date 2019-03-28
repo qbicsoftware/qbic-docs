@@ -1,0 +1,20 @@
+.. QBiC documentation template file. 
+
+
+============================
+QBiC technical documentation
+============================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   $QBIC_REPOSITORIES$
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
