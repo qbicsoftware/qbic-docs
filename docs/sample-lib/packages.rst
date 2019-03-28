@@ -1,5 +1,5 @@
-Javadoc
-=======
+sample-lib
+==========
 
 .. toctree::
    :maxdepth: 2
