@@ -14,7 +14,9 @@ API documentation
 =================
 
    a. sample-lib
+
    a. other-lib
+   
    a. whatever-lib
 
 
