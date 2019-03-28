@@ -11,7 +11,7 @@ QBiC technical documentation
    :maxdepth: 1
    :caption: Contents:
 
-   sample-lib <sample-lib/packages>
+   sample-lib/packages
 
 
 Indices and tables
