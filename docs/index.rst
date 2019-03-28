@@ -10,11 +10,7 @@ QBiC technical documentation
    :maxdepth: 2
    :caption: Contents:
 
-Javadocs
-========
    packages
-
-
 
 Indices and tables
 ==================
