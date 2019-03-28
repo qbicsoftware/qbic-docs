@@ -19,7 +19,7 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'QBiC (mostly technical) docs'
+project = 'QBiC'
 copyright = '2019, QBiC'
 author = 'QBiC'
 
@@ -38,8 +38,7 @@ release = ''
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = [
-]
+extensions = ['javasphinx']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -101,7 +100,7 @@ html_static_path = ['_static']
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'QBiCmostlytechnicaldocsdoc'
+htmlhelp_basename = 'qbicdocsdoc'
 
 
 # -- Options for LaTeX output ------------------------------------------------
@@ -128,7 +127,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-    (master_doc, 'QBiCmostlytechnicaldocs.tex', 'QBiC (mostly technical) docs Documentation',
+    (master_doc, 'qbicdocs.tex', 'QBiC Documentation',
      'QBiC', 'manual'),
 ]
 
@@ -138,7 +137,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    (master_doc, 'qbicmostlytechnicaldocs', 'QBiC (mostly technical) docs Documentation',
+    (master_doc, 'qbicdocs', 'QBiC Documentation',
      [author], 1)
 ]
 
@@ -149,8 +148,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-    (master_doc, 'QBiCmostlytechnicaldocs', 'QBiC (mostly technical) docs Documentation',
-     author, 'QBiCmostlytechnicaldocs', 'One line description of project.',
+    (master_doc, 'qbicdocs', 'QBiC Documentation',
+     author, 'qbicdocs', 'QBiC technical documentation.',
      'Miscellaneous'),
 ]
 
