@@ -10,7 +10,13 @@ QBiC technical documentation
    :maxdepth: 2
    :caption: Contents:
 
-   packages
+API documentation
+=================
+
+   a. sample-lib
+   a. other-lib
+   a. whatever-lib
+
 
 Indices and tables
 ==================
