@@ -27,7 +27,7 @@
 #        │           └── FooBarClass.rst
 #        └── packages.rst
 
-import argparse, os, suprocess
+import argparse, os, subprocess
 from datetime import date
 
 # how many spaces should we write before writing each submodule name
@@ -66,11 +66,11 @@ def main():
     args = parser.parse_args()
 
     # read contents of the submodules file into a list
-    submodules_list = parse_submodules_file(args.repositories_file)
+    submodules_list = parse_submodules_file(args.submodules_file)
     # for each repo, make sure that it has been added as a submodule, then
     # update each submodule and generate javadocs for it
     for submodule_name in submodules_list:
-        update_submodule(submodule_name)
+        update_submodule(submodule_name, args.branch)
         generate_javadocs(args.output_dir, submodule_name)
     # update index.rst and conf.py based on their templates   
     update_master_file('{}/{}'.format(args.output_dir, INDEX_FILE), args.index_template_file, submodules_list)
@@ -84,8 +84,8 @@ def parse_submodules_file(submodules_file):
     with open(submodules_file, "r") as f: 
         for line in f:
             line = line.strip()
-            # ignore comments
-            if (line.startswith('#')):
+            # ignore comments and empty lines
+            if not line or line.startswith('#'):
                 continue
             submodule_names.append(line)
     return submodule_names
@@ -121,7 +121,7 @@ def update_master_file(index_file, template_file, submodules_list):
     # be nice and list repos alphabetically in index.rst
     for submodule_name in submodules_list.sorted():
         # this works in python lol
-        indented_submodules = indented_submodules + 
+        indented_submodules = indented_submodules + \
             '{}{}\n'.format(' ' * SUBMODULE_INDENTATION_LEVEL, submodule_name)
     variables = {}
     variables[SUBMODULES_PLACEHOLDER] = indented_submodules
