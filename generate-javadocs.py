@@ -49,6 +49,9 @@ CONF_FILE = "conf.py"
 SUBMODULE_FOLDER = "modules"
 # folder that has the source code, relative to each submodule folder
 SOURCE_DIR = 'src/main'
+# name of branches
+DEVELOPMENT_BRANCH = 'development'
+RELEASE_BRANCH = 'master'
 
 # parses arguments
 def main():
@@ -80,6 +83,7 @@ def main():
 # a list where each element is a line in the file.
 # Lines starting with '#' are ignored
 def parse_submodules_file(submodules_file):
+    print('Reading submodule names from {}'.format(submodules_file))
     submodule_names = []
     with open(submodules_file, "r") as f: 
         for line in f:
@@ -88,6 +92,7 @@ def parse_submodules_file(submodules_file):
             if not line or line.startswith('#'):
                 continue
             submodule_names.append(line)
+            print('  Found submodule {}'.format(line))
     return submodule_names
 
 # issues git commands to add/update a git submodule
@@ -95,11 +100,14 @@ def parse_submodules_file(submodules_file):
 def update_submodule(submodule_name, branch):
     # relative path to the submodule folder
     submodule_dir = get_submodule_dir(submodule_name)
+    print('Updating {}'.format(submodule_dir))
     # force-add submodules
+    print('  force-adding...')
     execute(
         ["git", "submodule", "add", "--force", "-b", branch, '../{}'.format(submodule_name), submodule_dir],
         'Could not add submodule {}.'.format(submodule_name))    
     # update submodule
+    print('  updating...')
     execute(
         ["git", "submodule", "update", "--remote", submodule_dir], 
         'Could not update submodule {}.'.format(submodule_name))
@@ -107,15 +115,16 @@ def update_submodule(submodule_name, branch):
 # generates javadocs for the given submodule
 def generate_javadocs(output_dir, submodule_name):
     # each submodule gets a directory under output_dir (e.g., docs/foo-lib, docs/bar-service)
-    # make sure that the folder exists
+    # make sure that the folder exists    
     javadoc_output_dir = get_javadoc_output_dir(output_dir, submodule_name)
     submodule_src_dir = '{}/{}'.format(get_submodule_dir(submodule_name), SOURCE_DIR)
+    print('Generating javadocs from {} into {}'.format(submodule_src_dir, javadoc_output_dir))
     if not (os.path.exists(javadoc_output_dir)):
         os.makedirs(javadoc_output_dir)
     execute(['javasphinx-apidoc', '-o', javadoc_output_dir, '-t', submodule_name, submodule_src_dir])
 
 # updates index.rst based on a template, substituting placeholders
-def update_master_file(index_file, template_file, submodules_list):
+def update_master_file(index_file, template_file, submodules_list):    
     # convert the list of modules to a string with indented lines    
     indented_submodules = ''
     # be nice and list repos alphabetically in index.rst
@@ -130,12 +139,12 @@ def update_master_file(index_file, template_file, submodules_list):
 # updates conf.py based on a template, substituting placeholders
 def update_conf(conf_file, template_file, branch):
     variables = {}    
-    if branch == 'development':
+    if branch == DEVELOPMENT_BRANCH:
         variables[LONG_VERSION_PLACEHOLDER] = 'Development (SNAPSHOT)'
-    elif branch == 'master':
+    elif branch == RELEASE_BRANCH:
         variables[LONG_VERSION_PLACEHOLDER] = 'Stable release'
     else:
-        raise Exception('Unrecognized branch {}. Only "development" and "master" are recognized'.format(branch))
+        raise Exception('Unrecognized branch {}. Only {} and {} are recognized'.format(branch, DEVELOPMENT_BRANCH, RELEASE_BRANCH))
     variables[SHORT_VERSION_PLACEHOLDER] = branch
     variables[CURRENT_YEAR_PLACEHOLDER] = str(date.today().year)
     resolve_placeholders(conf_file, template_file, **variables)
@@ -143,13 +152,16 @@ def update_conf(conf_file, template_file, branch):
 # reads a template file, substitutes placeholders (**kwargs), and writes
 # the resolved template to dest_file
 def resolve_placeholders(dest_file_path, template_file_path, **kwargs):
+    print('Resolving placeholders using {} as template'.format(template_file_path))
     # read the full contents of the file
     with open(template_file_path, 'r') as f:
         content = f.read()
     # resolve all placeholders
     for placeholder_name, placeholder_value in kwargs.items():
+        print('  replacing {} with {}'.format(placeholder_name, placeholder_value))
         content.replace(placeholder_name, placeholder_value)
     # write content to the destination file
+    print('  writing to {}'.format(dest_file_path))
     with open(dest_file_path, 'w') as f:
         f.write(content)
 
@@ -165,7 +177,7 @@ def get_javadoc_output_dir(base_dir, submodule_name):
 def execute(command, error_message):
     completed_process = subprocess.run(command, capture_output=True)
     if (completed_process.returncode != 0):
-        raise Exception('{}.\nExit code={}.\nStderr={}\nStdout{}'.format(
+        raise Exception('{}\n  Exit code={}\n  stderr={}\n  stdout{}'.format(
             error_message, completed_process.returncode, completed_process.stderr, completed_process.stdout))
 
 if __name__ == "__main__":
