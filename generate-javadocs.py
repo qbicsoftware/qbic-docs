@@ -121,7 +121,9 @@ def generate_javadocs(output_dir, submodule_name):
     print('Generating javadocs from {} into {}'.format(submodule_src_dir, javadoc_output_dir))
     if not (os.path.exists(javadoc_output_dir)):
         os.makedirs(javadoc_output_dir)
-    execute(['javasphinx-apidoc', '-o', javadoc_output_dir, '-t', submodule_name, submodule_src_dir])
+    execute(
+        ['javasphinx-apidoc', '-o', javadoc_output_dir, '-t', submodule_name, submodule_src_dir],
+        'Could not generate javadocs for {}'.format(submodule_name))
 
 # updates index.rst based on a template, substituting placeholders
 def update_master_file(index_file, template_file, submodules_list):    
