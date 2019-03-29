@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Script to generate documentation javadocs using javasphinx
-# This script assumes that javasphinx has been installed.
+# This script assumes that javasphinx and git have been installed.
 
 # Output of this script is to populate the "docs" folder. For each submodule
 # in submodules.txt, a folder under docs will be created. The folder structure looks like:
@@ -28,29 +28,40 @@
 #        └── packages.rst
 
 import argparse, os, suprocess
+from datetime import date
 
-# useful constants
-# how many spaces should we write before writing each repo name
-REPOSITORY_INDENTATION_LEVEL = 3
-# placeholder that will be substituted for the list of repositories
-REPOSITORIES_PLACEHOLDER = "$QBIC_REPOSITORIES$"
+# how many spaces should we write before writing each submodule name
+SUBMODULE_INDENTATION_LEVEL = 3
+# placeholder that will be substituted for the list of submodules
+# if you change the value, make sure to also update the template file
+# (.index.rst.template)
+SUBMODULES_PLACEHOLDER = "$QBIC_DOCS_SUBMODULES$"
+# version string placeholders
+SHORT_VERSION_PLACEHOLDER = "$QBIC_DOCS_VERSION_SHORT$"
+LONG_VERSION_PLACEHOLDER = "$QBIC_DOCS_VERSION_FULL$"
+# current year placeholder
+CURRENT_YEAR_PLACEHOLDER = "$QBIC_DOCS_CURRENT_YEAR$"
 # name of the master document
-MASTER_DOCUMENT_NAME = "index.rst"
+INDEX_FILE = "index.rst"
+# name of the configuration file
+CONF_FILE = "conf.py"
 # directory where all git submodules reside
 SUBMODULE_FOLDER = "modules"
 # folder that has the source code, relative to each submodule folder
-SOURCE_DIR = 'src/java/main'
+SOURCE_DIR = 'src/main'
 
 # parses arguments
 def main():
     parser = argparse.ArgumentParser(description='QBiC Javadoc Generator.', prog='generate-javadocs.py', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-s', '--submodules-file', required=True, default='submodules.txt',
         help='File containing a list of submodules. For each submodule, javadocs will be generated.')
-    parser.add_argument('-t', '--template-file', required=True, default='.index.rst.template',
+    parser.add_argument('-i', '--index-template-file', required=True, default='.index.rst.template',
         help='Template file to generate index.rst.')
+    parser.add_argument('-c', '--conf-template-file', required=True, default='.conf.py',
+        help='Template file to generate conf.py.')
     parser.add_argument('-o', '--output-dir', required=True, default='docs',
         help='Folder on which the javadocs will be generated.')
-    parser.add_argument('-b', '--branch', required=True, default='master',
+    parser.add_argument('-b', '--branch', required=True, 
         help='Branch from which javadocs will be generated for each submodule.')
     args = parser.parse_args()
 
@@ -61,22 +72,22 @@ def main():
     for submodule_name in submodules_list:
         update_submodule(submodule_name)
         generate_javadocs(args.output_dir, submodule_name)
-    # update index.rst    
-    update_master_file(args.output_dir, args.template_file, submodules_list)
+    # update index.rst and conf.py based on their templates   
+    update_master_file('{}/{}'.format(args.output_dir, INDEX_FILE), args.index_template_file, submodules_list)
+    update_conf('{}/{}'.format(args.output_dir, CONF_FILE), args.conf_template_file, args.branch)
     
 # Parses the file found at the given path, returns
 # a list where each element is a line in the file.
 # Lines starting with '#' are ignored
 def parse_submodules_file(submodules_file):
     submodule_names = []
-    f = open(submodules_file, "r")
-    for line in f:
-        line = line.strip()
-        # ignore comments
-        if (line.startswith('#')):
-            continue
-        submodule_names.append(line)
-    f.close()
+    with open(submodules_file, "r") as f: 
+        for line in f:
+            line = line.strip()
+            # ignore comments
+            if (line.startswith('#')):
+                continue
+            submodule_names.append(line)
     return submodule_names
 
 # issues git commands to add/update a git submodule
@@ -98,15 +109,49 @@ def generate_javadocs(output_dir, submodule_name):
     # each submodule gets a directory under output_dir (e.g., docs/foo-lib, docs/bar-service)
     # make sure that the folder exists
     javadoc_output_dir = get_javadoc_output_dir(output_dir, submodule_name)
-    src_dir = '{}/{}'.format(get_submodule_dir(submodule_name), SOURCE_DIR)
+    submodule_src_dir = '{}/{}'.format(get_submodule_dir(submodule_name), SOURCE_DIR)
     if not (os.path.exists(javadoc_output_dir)):
         os.makedirs(javadoc_output_dir)
-    execute(['javasphinx-apidoc', '-o', javadoc_output_dir, '-t', submodule_name])
-    javasphinx-apidoc -o sample-lib -t sample-lib ~/Projects/QBiC/cookiecutter-templates-cli/generated/sample-cli/src/main/
+    execute(['javasphinx-apidoc', '-o', javadoc_output_dir, '-t', submodule_name, submodule_src_dir])
 
-def update_master_file(master_file, template_file, submodules_list):
-    # be nice and list repos alphabetically in index.rst    
-    sorted_submodules_list = submodules_list.sorted()
+# updates index.rst based on a template, substituting placeholders
+def update_master_file(index_file, template_file, submodules_list):
+    # convert the list of modules to a string with indented lines    
+    indented_submodules = ''
+    # be nice and list repos alphabetically in index.rst
+    for submodule_name in submodules_list.sorted():
+        # this works in python lol
+        indented_submodules = indented_submodules + 
+            '{}{}\n'.format(' ' * SUBMODULE_INDENTATION_LEVEL, submodule_name)
+    variables = {}
+    variables[SUBMODULES_PLACEHOLDER] = indented_submodules
+    resolve_placeholders(index_file, template_file, **variables)
+
+# updates conf.py based on a template, substituting placeholders
+def update_conf(conf_file, template_file, branch):
+    variables = {}    
+    if branch == 'development':
+        variables[LONG_VERSION_PLACEHOLDER] = 'Development (SNAPSHOT)'
+    elif branch == 'master':
+        variables[LONG_VERSION_PLACEHOLDER] = 'Stable release'
+    else:
+        raise Exception('Unrecognized branch {}. Only "development" and "master" are recognized'.format(branch))
+    variables[SHORT_VERSION_PLACEHOLDER] = branch
+    variables[CURRENT_YEAR_PLACEHOLDER] = str(date.today().year)
+    resolve_placeholders(conf_file, template_file, **variables)
+
+# reads a template file, substitutes placeholders (**kwargs), and writes
+# the resolved template to dest_file
+def resolve_placeholders(dest_file_path, template_file_path, **kwargs):
+    # read the full contents of the file
+    with open(template_file_path, 'r') as f:
+        content = f.read()
+    # resolve all placeholders
+    for placeholder_name, placeholder_value in kwargs.items():
+        content.replace(placeholder_name, placeholder_value)
+    # write content to the destination file
+    with open(dest_file_path, 'w') as f:
+        f.write(content)
 
 # given a submodule, returns the path of the folder, relative to the master repo
 def get_submodule_dir(submodule_name):
@@ -122,8 +167,6 @@ def execute(command, error_message):
     if (completed_process.returncode != 0):
         raise Exception('{}.\nExit code={}.\nStderr={}\nStdout{}'.format(
             error_message, completed_process.returncode, completed_process.stderr, completed_process.stdout))
-
-
 
 if __name__ == "__main__":
     main()

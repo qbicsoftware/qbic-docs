@@ -1,4 +1,5 @@
 .. QBiC documentation template file. 
+   Strings delimited by '$' will be replaced on the fly by generate-javadocs.sh
 
 
 ============================
@@ -9,7 +10,7 @@ QBiC technical documentation
    :maxdepth: 1
    :caption: Contents:
 
-   $QBIC_REPOSITORIES$
+$QBIC_DOCS_SUBMODULES$
 
 
 Indices and tables

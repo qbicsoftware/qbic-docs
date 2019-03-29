@@ -12,10 +12,11 @@ cache:
   directories:
     - "$HOME/.cache/pip"
 
-# Maintain only one version of the docs, for now
+# We keep two versions of the docs, for now, master and SNAPSHOTS
 branches:
   only:
   - master
+  - development
 
 # added to make logs look cleaner, crisper, certified fresh
 before_install: unset _JAVA_OPTIONS 
@@ -25,16 +26,17 @@ install:
   - pip install javasphinx
 
 # keeping complicated scripts separate is not much, but it's honest work
-script: generate-javadocs.py -r submodules.txt -t .index.rst.template -o docs -b master
+script: generate-javadocs.py -r submodules.txt -t .index.rst.template -o docs -b $TRAVIS_BRANCH
 
 # commit and push changes
 deploy:
   # our "deployment" is to commit and push changes done in the docs folder
+  # to trigger ReadTheDocs.org's webhook
 - skip_cleanup: true
   provider: script
   script: push-changes.sh docs
   on:
-    branch: master
+    all_branches: true
     condition: '"$TRAVIS_EVENT_TYPE" = "push"'
 
 # GitHub access credentials (username, acces token)
