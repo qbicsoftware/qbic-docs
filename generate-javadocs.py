@@ -175,6 +175,7 @@ def get_javadoc_output_dir(base_dir, submodule_name):
 
 # executes an external command, raises an exception if the return code is not 0
 def execute(command, error_message):
+    print('    executing {}'.format(' '.join(str(x) for x in command)))
     completed_process = subprocess.run(command, capture_output=True)
     if (completed_process.returncode != 0):
         raise Exception('{}\n  Exit code={}\n  stderr={}\n  stdout{}'.format(
