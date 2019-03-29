@@ -21,11 +21,11 @@ branches:
 before_install: unset _JAVA_OPTIONS 
 
 # we need javapshinx to generate javadocs
-install: true
-- pip install javasphinx
+install: 
+  - pip install javasphinx
 
 # keeping complicated scripts separate is not much, but it's honest work
-script: generate-javadocs.py -r repositories.txt -t .index.rst.template -o docs
+script: generate-javadocs.py -r submodules.txt -t .index.rst.template -o docs -b master
 
 # commit and push changes
 deploy:
@@ -37,7 +37,7 @@ deploy:
     branch: master
     condition: '"$TRAVIS_EVENT_TYPE" = "push"'
 
-# GitHub access credentials (username/token)
+# GitHub access credentials (username, acces token)
 env:
   global:
     - secure: "kschiefcCbkZhDHvuSi2AGEAG95OFKO8SJal8MzKm+Sqivi8stwClQ3KBYnbKJ3WswG12GkuAPSScCme5sDjhKw2N/pML8O/+VtuqGNE7HtNQQgRhuMZr2A6Wx0X+7I80IT8/BMrpZnyuUx/eXkDe/jt7hZXiCqQzlq8XPQCaI331kJ792gI/pru4mx7f1USu7dBFG3bOBbwcrpUzbF3IdxN318ge8tVv60bMhXv+BDbiN8sgGKHL7TyfHIw8gU+n+toSFnhhDP31ojMMu5NHyyTfXt9/vFf5yMnRP1HVT8OGzVGE/PKpwPssZ41z9MvDZOHIvnw5cVTQFeZbyrNL4W46iUNhouODCBarhvsfVgGerlpomCGlP4yUP6JoB9mbvjBZsQpoIC07gy9jghJa3mPSaqUV3IMA3l/GRDo9n7EC1M26Qy8qVmz4odyYM1Ih/60tcgaPLy1SZnW4PIhJUBEA0/o5BXQwmdmdeJ1DoQoxHqBkrM/lIBM+Y8jXEPagTQ6Xb0jhwcj0B5vm6piw4jlKTbeftyB64yCNkRGfZRhGguFkwFa9kCsswUYtFKlaoSCwaJvlo5m0d66ykKU/NjXDnBQksMyxq0ThWn6AWN0OInlmiYaQqe0B7ryU64Ohm+qV/5hEpFd1G1IYTlcLnOeWpO2DJvwHqE1HrVKDE0="
